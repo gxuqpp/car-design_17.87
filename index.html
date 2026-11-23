@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>驻车制动工况与影响因素 · 汽车设计第9章</title>
+  <title>鼓式制动器无自锁条件 · 式（9-12）</title>
   <style>
 :root {
   color-scheme: light;
@@ -175,6 +175,37 @@ a {color:#155c7c;text-underline-offset:2px}
   .panel,.metric {box-shadow:none;break-inside:avoid}
 }
 
+.lesson {padding-bottom:14px}
+.step-nav {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:4px 0 13px}
+.step-nav button {min-height:40px;font-size:.86rem}
+.step-nav span {display:inline-block;margin-right:6px;font-variant-numeric:tabular-nums;font-weight:820}
+.derivation {display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:13px;align-items:start}
+.force-figure {min-width:0}
+.force-view {height:351px}
+.proof {min-width:0;border:1px solid #dbe7e9;border-radius:8px;background:#f8fbfb;padding:12px 13px}
+.proof p {font-size:.88rem;margin-top:7px;color:#374f59}
+.equation {font-size:clamp(.91rem,1.21vw,1.08rem);line-height:1.55;margin-top:7px;
+  padding:6px 8px;background:#e9f2f4;border-radius:5px;color:#153746;overflow-wrap:anywhere}
+.fraction {display:inline-grid;place-items:center;vertical-align:middle;line-height:1.19;max-width:100%;text-align:center}
+.fraction > span {display:block;padding:2px 4px;width:100%}
+.fraction > span:first-child {border-bottom:1px solid currentColor}
+.eq-no {color:#345d69;font:500 .78rem system-ui,sans-serif;white-space:nowrap}
+.step-controls {display:flex;justify-content:space-between;gap:6px;margin-top:12px}
+button:disabled {cursor:default;opacity:.48}
+button:disabled:hover {background:#f6fafb;border-color:#b9cfd6}
+#denom-plot {height:282px}
+.calc-list + details {margin-top:12px}
+.proof .equation .nowrap {white-space:nowrap}
+@media(max-width:1080px) {
+  .derivation {grid-template-columns:minmax(0,1fr)}
+  .force-view {height:328px}
+}
+@media(max-width:470px) {
+  .step-nav {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .force-view {height:257px}
+  #denom-plot {height:246px}
+}
+
   </style>
   <script>
   /* 防止右键与快捷键查看源代码 */
@@ -195,176 +226,172 @@ a {color:#155c7c;text-underline-offset:2px}
 </head>
 <body>
   <header class="mast"><div class="shell">
-    <div class="subject">《汽车设计》　制动系统设计</div>
-    <nav class="nav" aria-label="第9章教学工具"><span aria-current="page">驻车制动</span><a href="9.5-%E7%9C%9F%E7%A9%BA%E5%8A%A9%E5%8A%9B%E5%99%A8%E4%B8%8E%E5%88%B6%E5%8A%A8%E8%B8%8F%E6%9D%BF%E5%8A%9B-%E5%9B%BE9-14%E4%B8%8E%E5%9B%BE9-15.html">真空助力器</a><a href="9.2-%E9%BC%93%E5%BC%8F%E5%88%B6%E5%8A%A8%E5%99%A8%E7%BB%93%E6%9E%84%E4%B8%8E%E9%A2%86%E8%B9%84%E4%BB%8E%E8%B9%84-%E5%9B%BE9-1.html">鼓式制动器</a></nav>
+    <span class="subject">《汽车设计》　制动系统设计</span>
+    <nav class="nav" aria-label="第9章教学工具"><a href="17.86-9.2-%E9%BC%93%E5%BC%8F%E5%88%B6%E5%8A%A8%E5%99%A8%E7%BB%93%E6%9E%84%E4%B8%8E%E9%A2%86%E8%B9%84%E4%BB%8E%E8%B9%84-%E5%9B%BE9-1.html">鼓式制动器结构</a><span aria-current="page">鼓式制动器自锁判据</span></nav>
   </div></header>
   <main class="shell">
     <div class="intro">
-      <div><h1>驻车制动工况与影响因素</h1><p>后轮驻车时，换一个车头朝向，能停住的极限坡度会怎样变化？</p></div>
-      <p class="ref">教材第302页　图9-8与图9-9</p>
+      <div><h1>鼓式制动器无自锁条件</h1><p>从领蹄受力到式（9-12），看摩擦力为什么会使分母变小。</p></div>
+      <p class="ref">教材第304–306页　图9-12</p>
     </div>
 
-  <div class="workspace">
-    <aside class="controls panel" aria-label="驻车计算参数">
-      <h2>工况设置</h2>
-      <div class="actions">
-        <button id="park-book" type="button">图9-9示例</button>
-        <button id="park-truck" type="button">第1章轻型货车</button>
-      </div>
-      <fieldset class="seg top-gap">
-        <legend>车头方向</legend>
-        <label><input type="radio" name="orientation" id="face-up" checked><span>朝上坡</span></label>
-        <label><input type="radio" name="orientation" id="face-down"><span>朝下坡</span></label>
-      </fieldset>
-      <div class="field" id="slope-field">
+    <div class="workspace">
+      <aside class="panel controls" aria-label="自锁判定参数">
+        <h2>领蹄参数</h2>
+        <div class="field" id="friction-field">
   <div class="field-head">
-    <label id="slope-label" for="slope-num">坡度</label>
-    <span class="num"><input id="slope-num" type="number" min="0" max="100" step="any" value="20" aria-describedby="slope-help"> %</span>
+    <label id="friction-label" for="friction-num">衬片–制动鼓摩擦因数 f</label>
+    <span class="num"><input id="friction-num" type="number" min="0" max="2.2" step="any" value="0.3" aria-describedby="friction-help"> </span>
   </div>
-  <input type="range" id="slope" aria-labelledby="slope-label" min="0" max="100" step="0.5" value="20" aria-describedby="slope-help">
-  <p class="field-note" id="slope-help">坡度 20% 表示水平前进100 m、升高20 m。</p>
+  <input type="range" id="friction" aria-labelledby="friction-label" min="0" max="2.2" step="0.005" value="0.3" aria-describedby="friction-help">
+  <p class="field-note" id="friction-help">教材计算示例采用0.30。可沿滑条跨越理论临界点。</p>
 </div>
-<div class="field" id="adhesion-field">
+<div class="field" id="support-field">
   <div class="field-head">
-    <label id="adhesion-label" for="adhesion-num">轮胎–路面附着系数 φ</label>
-    <span class="num"><input id="adhesion-num" type="number" min="0" max="1" step="any" value="0.7"> </span>
+    <label id="support-label" for="support-num">鼓中心到支点 c′</label>
+    <span class="num"><input id="support-num" type="number" min="60" max="140" step="any" value="110"> mm</span>
   </div>
-  <input type="range" id="adhesion" aria-labelledby="adhesion-label" min="0" max="1" step="0.01" value="0.7">
+  <input type="range" id="support" aria-labelledby="support-label" min="60" max="140" step="1" value="110">
   
 </div>
-<div class="field" id="rearShare-field">
+<div class="field" id="radius-field">
   <div class="field-head">
-    <label id="rearShare-label" for="rearShare-num">水平路面后轴荷占比 L₁/L</label>
-    <span class="num"><input id="rearShare-num" type="number" min="20" max="90" step="any" value="71.6" aria-describedby="rearShare-help"> %</span>
+    <label id="radius-label" for="radius-num">等效摩擦作用半径 R₁</label>
+    <span class="num"><input id="radius-num" type="number" min="155" max="245" step="any" value="195" aria-describedby="radius-help"> mm</span>
   </div>
-  <input type="range" id="rearShare" aria-labelledby="rearShare-label" min="20" max="90" step="0.1" value="71.6" aria-describedby="rearShare-help">
-  <p class="field-note" id="rearShare-help">L₁ 为前轴到质心投影的距离。</p>
+  <input type="range" id="radius" aria-labelledby="radius-label" min="155" max="245" step="1" value="195" aria-describedby="radius-help">
+  <p class="field-note" id="radius-help">R₁ 为鼓中心到摩擦合力作用线的距离。</p>
 </div>
-<div class="field" id="height-field">
+<div class="field" id="angle-field">
   <div class="field-head">
-    <label id="height-label" for="height-num">质心高度 h<sub>g</sub></label>
-    <span class="num"><input id="height-num" type="number" min="0" max="3" step="any" value="1.28"> m</span>
+    <label id="angle-label" for="angle-num">法向合力线与 x₁ 的夹角 δ₁</label>
+    <span class="num"><input id="angle-num" type="number" min="-25" max="52" step="any" value="12"> °</span>
   </div>
-  <input type="range" id="height" aria-labelledby="height-label" min="0" max="3" step="0.01" value="1.28">
+  <input type="range" id="angle" aria-labelledby="angle-label" min="-25" max="52" step="1" value="12">
   
 </div>
-<div class="field" id="wheelbase-field">
+<div class="field" id="lever-field">
   <div class="field-head">
-    <label id="wheelbase-label" for="wheelbase-num">轴距 L</label>
-    <span class="num"><input id="wheelbase-num" type="number" min="1.5" max="8" step="any" value="4"> m</span>
+    <label id="lever-label" for="lever-num">张开力对支点的力臂 h</label>
+    <span class="num"><input id="lever-num" type="number" min="150" max="270" step="any" value="210"> mm</span>
   </div>
-  <input type="range" id="wheelbase" aria-labelledby="wheelbase-label" min="1.5" max="8" step="0.05" value="4">
+  <input type="range" id="lever" aria-labelledby="lever-label" min="150" max="270" step="1" value="210">
   
 </div>
-<div class="field" id="mass-field">
+<div class="field" id="opening-field">
   <div class="field-head">
-    <label id="mass-label" for="mass-num">整车质量 m<sub>a</sub></label>
-    <span class="num"><input id="mass-num" type="number" min="500" max="20000" step="any" value="8000"> kg</span>
+    <label id="opening-label" for="opening-num">领蹄张开力 F₀₁</label>
+    <span class="num"><input id="opening-num" type="number" min="0" max="2000" step="any" value="450"> N</span>
   </div>
-  <input type="range" id="mass" aria-labelledby="mass-label" min="500" max="20000" step="50" value="8000">
+  <input type="range" id="opening" aria-labelledby="opening-label" min="0" max="2000" step="10" value="450">
   
 </div>
-      <details>
-        <summary>轮胎半径与制动器力矩</summary>
-        <div class="field" id="radius-field">
-  <div class="field-head">
-    <label id="radius-label" for="radius-num">车轮滚动半径 r<sub>e</sub></label>
-    <span class="num"><input id="radius-num" type="number" min="0.2" max="0.65" step="any" value="0.325"> m</span>
-  </div>
-  <input type="range" id="radius" aria-labelledby="radius-label" min="0.2" max="0.65" step="0.005" value="0.325">
-  
-</div>
-        <label class="check"><input type="checkbox" id="limit-torque"> 计入力矩上限</label>
-        <div id="torque-input" hidden><div class="field" id="torque-field">
-  <div class="field-head">
-    <label id="torque-label" for="torque-num">后轴可用总制动力矩 T₂</label>
-    <span class="num"><input id="torque-num" type="number" min="0" max="30000" step="any" value="2600" aria-describedby="torque-help"> N·m</span>
-  </div>
-  <input type="range" id="torque" aria-labelledby="torque-label" min="0" max="30000" step="25" value="2600" aria-describedby="torque-help">
-  <p class="field-note" id="torque-help">两侧驻车制动作用的总和。</p>
-</div></div>
-      </details>
-      <p id="inputs-note" class="field-note wide"></p>
-    </aside>
-    <div class="stack">
-      <dl class="metrics"><div class="metric primary"><dt>坡道需要的驻车力</dt>
-    <dd><span id="needed">—</span><small>N</small></dd></div><div class="metric"><dt>后轴附着上限</dt>
-    <dd><span id="grip">—</span><small>N</small></dd></div><div class="metric"><dt>实际可提供上限</dt>
-    <dd><span id="capacity">—</span><small>N</small></dd></div><div class="metric"><dt>本坡所需后轴力矩</dt>
-    <dd><span id="required-torque">—</span><small>N·m</small></dd></div></dl>
-      <div class="message" id="parking-status" role="status"></div>
-      <section class="panel visual-panel">
-        <div class="panel-title"><h2>驻车力需求与后轴附着</h2><span class="hint">当前坡角 <strong id="slope-angle">—</strong>°</span></div>
-        <figure>
-          <canvas class="plot" id="park-chart" role="img" aria-label="坡角与后轴附着曲线"></canvas>
-          <ul class="legend"><li><i class="swatch" style="--swatch:var(--rust)"></i>坡道所需制动力</li><li><i class="swatch" style="--swatch:var(--teal)"></i>车头朝上坡</li><li><i class="swatch dash" style="--swatch:var(--purple)"></i>车头朝下坡</li><li id="torque-legend"><i class="swatch dash" style="--swatch:#687983"></i>制动器力矩上限</li></ul>
-          <figcaption>两处交点为教材的附着极限。附着曲线在车轮离地处停止。竖虚线表示当前坡道。</figcaption>
-        </figure>
-        <div class="table-scroll">
-          <table class="data-table">
-            <thead><tr><th scope="col">方向</th><th scope="col">附着极限</th><th scope="col">综合极限</th><th scope="col">先达到的限制</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">车头朝上坡</th><td id="up-grip"></td><td id="up-limit"></td><td id="up-factor"></td></tr>
-              <tr><th scope="row">车头朝下坡</th><td id="down-grip"></td><td id="down-limit"></td><td id="down-factor"></td></tr>
-            </tbody>
-          </table>
+        <div class="actions wide top-gap">
+          <button id="load-example" type="button">手算例</button>
+          <button id="release-shoe" type="button">令 F₀₁＝0</button>
+          <button id="reset-input" type="button">恢复初值</button>
         </div>
+      </aside>
+
+      <div class="stack">
+        <dl class="metrics"><div class="metric primary"><dt>临界摩擦因数 f<sub>cr</sub></dt>
+    <dd><span id="critical-f">—</span><small></small></dd></div><div class="metric"><dt>式（9-12）分母</dt>
+    <dd><span id="denominator">—</span><small>mm</small></dd></div><div class="metric"><dt>法向合力 F₁</dt>
+    <dd><span id="normal-force">—</span><small>N</small></dd></div><div class="metric"><dt>单蹄制动力矩 M<sub>μt1</sub></dt>
+    <dd><span id="brake-moment">—</span><small>N·m</small></dd></div></dl>
+        <div class="message" id="lock-status" role="status"></div>
+        <section class="panel lesson" aria-label="式9-12逐步推导">
+          <div class="panel-title"><h2>式（9-12）逐步推导</h2></div>
+          <nav class="step-nav" aria-label="选择推导步骤"><button type="button" data-step="0" aria-pressed="true"><span>1</span>列平衡方程</button><button type="button" data-step="1" aria-pressed="false"><span>2</span>消元求合力</button><button type="button" data-step="2" aria-pressed="false"><span>3</span>求制动力矩</button><button type="button" data-step="3" aria-pressed="false"><span>4</span>判定自锁</button></nav>
+          <div class="derivation">
+            <figure class="force-figure">
+              <canvas class="diagram force-view" id="force-view" role="img" aria-label="图9-12领蹄受力与力臂"></canvas>
+              <ul class="legend"><li><i class="swatch" style="--swatch:var(--blue)"></i>张开力 F₀₁</li><li><i class="swatch" style="--swatch:var(--teal)"></i>法向合力 F₁</li><li><i class="swatch" style="--swatch:var(--rust)"></i>摩擦合力 fF₁</li><li><i class="swatch" style="--swatch:#687983"></i>支承反力分量</li></ul>
+              <figcaption id="figure-note"></figcaption>
+            </figure>
+            <div class="proof" id="proof">
+              <article data-proof="0">
+                <h3>沿 x₁ 投影，绕鼓中心 O 取矩</h3>
+                <p>取逆时针为力矩正向。法向合力 F₁ 的作用线通过 O。支承反力沿 y₁ 的分量也通过 O，两者绕 O 的力矩为零。</p>
+                <div class="equation math">F₀₁ cos α₀ + F′<sub>x</sub> − F₁(cos δ₁ + f sin δ₁) = 0</div>
+                <div class="equation math">F₀₁ a − F′<sub>x</sub> c′ + fR₁F₁ = 0</div>
+                <p>两式分别对应式（9-10）的力平衡与力矩平衡。F′<sub>x</sub> 是沿 x₁ 的支承反力投影。</p>
+              </article>
+              <article data-proof="1" hidden>
+                <h3>消去支承反力 F′<sub>x</sub></h3>
+                <p>先由力平衡解出 F′<sub>x</sub>，代入绕 O 的力矩方程。</p>
+                <div class="equation math">F′<sub>x</sub> = F₁(cos δ₁ + f sin δ₁) − F₀₁ cos α₀</div>
+                <p>整理后，右边的力臂 a + c′ cos α₀ 恰好等于 h。</p>
+                <div class="equation math">F₁[c′(cos δ₁ + f sin δ₁) − fR₁] = hF₀₁</div>
+                <div class="equation math">F₁ = <span class="fraction"><span>hF₀₁</span><span>c′(cos δ₁ + f sin δ₁) − fR₁</span></span> <span class="eq-no">（9-11）</span></div>
+              </article>
+              <article data-proof="2" hidden>
+                <h3>把法向合力换成鼓上的制动力矩</h3>
+                <p>由式（9-9），鼓上力矩的大小是摩擦合力 fF₁ 乘以对鼓中心的力臂 R₁。</p>
+                <div class="equation math">M<sub>μt1</sub> = fF₁R₁</div>
+                <p>代入式（9-11），得到输入张开力与单蹄制动力矩的关系。</p>
+                <div class="equation math">M<sub>μt1</sub> = <span class="fraction"><span>F₀₁ f h R₁</span><span>c′(cos δ₁ + f sin δ₁) − fR₁</span></span> <span class="nowrap">= F₀₁D₁</span> <span class="eq-no">（9-12）</span></div>
+                <p>D₁ 是力矩与张开力之比，单位为 mm。用 N 和 mm 代入得到 N·mm，页面将力矩换算为 N·m。</p>
+              </article>
+              <article data-proof="3" hidden>
+                <h3>分母为零时，两个力矩恰好相抵</h3>
+                <div class="equation math">分母 = c′ cos δ₁ − f(R₁ − c′ sin δ₁)</div>
+                <p>绕支点 A₁ 看，第一项乘 F₁ 是法向力的闭合力矩，第二项乘 F₁ 是摩擦助张开的力矩。两者相等时，即使 F₀₁＝0，矩平衡仍允许已有的压紧力。</p>
+                <div class="equation math">f<sub>cr</sub> = <span class="fraction"><span>c′ cos δ₁</span><span>R₁ − c′ sin δ₁</span></span> <span class="nowrap">　无自锁 f &lt; f<sub>cr</sub></span></div>
+                <p>图示领蹄的 R₁ − c′ sin δ₁ &gt; 0。分母为正时，令 F₀₁＝0，由 F₁×分母＝hF₀₁ 得 F₁＝0，蹄片失去压紧力。</p>
+              </article>
+              <div class="step-controls">
+                <button type="button" id="step-back">上一步</button>
+                <button type="button" id="step-next">下一步</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="columns">
+      <section class="panel visual-panel">
+        <div class="panel-title"><h2>分母随摩擦因数变化</h2></div>
+        <div class="actions">
+          <button type="button" data-boundary="0.95">临界前</button>
+          <button type="button" data-boundary="1">到临界点</button>
+          <button type="button" data-boundary="1.05">越过临界点</button>
+        </div>
+        <figure>
+          <canvas class="plot" id="denom-plot" role="img" aria-label="式9-12分母与摩擦因数曲线"></canvas>
+          <ul class="legend"><li><i class="swatch" style="--swatch:var(--teal)"></i>分母</li><li><i class="swatch" style="--swatch:var(--rust)"></i>自锁临界</li><li><i class="swatch dash" style="--swatch:#687983"></i>分母为零</li></ul>
+          <figcaption id="boundary-note"></figcaption>
+        </figure>
       </section>
       <section class="panel">
-        <div class="panel-title"><h2>坡道受力</h2><span class="hint" id="ratio-explain"></span></div>
-        <figure>
-          <canvas class="diagram park-diagram" id="park-force" role="img" aria-label="车辆驻车受力示意"></canvas>
-          <figcaption>驻车力需求沿坡指向高处。蓝色箭头为前、后轴法向力，车身和坡角按示意比例绘制。</figcaption>
-        </figure>
-        <dl class="pressure-readings">
-          <div><dt>前轴法向力 Z₁</dt><dd><span id="front-load">—</span> N</dd></div>
-          <div><dt>后轴法向力 Z₂</dt><dd><span id="rear-load">—</span> N</dd></div>
-        </dl>
+        <h2>绕支点 A₁ 比较力矩</h2>
+        <p class="panel-copy">每 1 N 法向合力 F₁ 所对应的两项力矩。</p>
+        <div class="bars">
+          <div class="bar-line"><span>法向力闭合</span><div class="bar-track"><i id="normal-bar"></i></div><strong id="normal-arm"></strong></div>
+          <div class="bar-line"><span>摩擦助张开</span><div class="bar-track"><i class="rust" id="friction-bar"></i></div><strong id="friction-arm"></strong></div>
+        </div>
+        <h3>带入当前数据</h3>
+        <ul class="calc-list">
+          <li id="calc-critical"></li><li id="calc-denominator"></li><li id="calc-result"></li>
+        </ul>
+        <details>
+          <summary>图中符号和模型范围</summary>
+          <p class="panel-copy">c′ 是鼓中心 O 到支点 A₁ 的距离。h 是张开力 F₀₁ 的作用线到支点 A₁ 的垂距。R₁ 是摩擦合力对 O 的力臂。δ₁ 按式（9-10）的投影方向取符号。</p>
+          <p class="panel-copy">图中固定 α₀＝18° 用于示意投影。式（9-12）直接用 h。图线使用等效作用线，箭头仅表示力的方向。判据对应单个领蹄的静力模型。</p>
+        </details>
       </section>
     </div>
-  </div>
-  <div class="columns">
-    <section class="panel">
-      <h2>用当前数值走一遍计算</h2>
-      <ul class="calc-list">
-        <li id="calc-gravity"></li><li id="calc-rear"></li><li id="calc-grip"></li><li id="calc-torque"></li>
-      </ul>
-      <details>
-        <summary>从图9-8到图9-9的公式</summary>
-        <p class="panel-copy"><span class="math">F<sub>B2</sub>=m<sub>a</sub>g sin α；Z₂=m<sub>a</sub>g[(L₁/L) cos α ± (h<sub>g</sub>/L) sin α]；F₂φ=φZ₂。</span>
-        车头朝上坡取加号，朝下坡取减号。可用驻车力取附着上限与 T₂/r<sub>e</sub> 中较小值。</p>
-        <p class="panel-copy"><span class="math">tan α<sub>上</sub>=φL₁/(L−φh<sub>g</sub>)，tan α<sub>下</sub>=φL₁/(L+φh<sub>g</sub>)。</span>
-        令附着上限等于驻车需求得到附着极限。综合极限同时满足两轴接地和可用制动力矩。坡度＝100 tan α（%）。</p>
-      </details>
-    </section>
-    <section class="panel">
-      <div class="panel-title"><h2>每次只改一个量</h2>
-        <div class="actions">
-          <button id="baseline-save" type="button">记录当前为对照</button>
-          <button id="baseline-clear" type="button" hidden>清除对照</button>
-        </div>
-      </div>
+
+    <section class="panel top-gap">
+      <h2>课堂探究</h2>
       <ol class="tasks">
-        <li>保持坡度，切换车头朝向。比较两次 Z₂ 和车轮附着上限。</li>
-        <li>增大质心高度或把质心后移。找出哪一种改动会让上下坡极限向相反方向变化。</li>
-        <li>减小 φ 后再增大 T₂。找出继续加力矩也无法提高本坡驻车力的情形。</li>
-        <li>只增大质量。先比较附着极限，再固定偏小的 T₂，观察力矩受限时综合极限怎样变化。</li>
+        <li>载入手算例。将 f 依次调到0.30、0.49、0.50和0.51，比较分母，再解释为何后两组停止给出有限制动力矩。</li>
+        <li>在临界点按“令 F₀₁＝0”。结合两条力矩条，解释为什么矩平衡仍允许蹄片与鼓保持压紧。</li>
+        <li>在无自锁区只增大 F₀₁，比较临界 f 与制动力矩。再只改 R₁，说明哪一项力臂变化改变了临界 f。</li>
       </ol>
     </section>
-  </div>
-  <section id="baseline-box" class="panel top-gap" hidden>
-    <h2>本次改动前后</h2>
-    <div class="table-scroll">
-      <table class="data-table">
-        <thead><tr><th scope="col">工况</th><th scope="col">参数</th><th scope="col">上坡综合极限</th><th scope="col">下坡综合极限</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">对照 <span id="base-mode"></span></th><td id="base-inputs"></td><td id="base-up"></td><td id="base-down"></td></tr>
-          <tr><th scope="row">当前 <span id="current-mode"></span></th><td id="current-inputs"></td><td id="current-up"></td><td id="current-down"></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-    <footer>《汽车设计》第5版第9章，印刷第302页。两轴静力模型，驻车力由后轴提供。取 g＝9.8 m/s²。</footer>
+    <footer>《汽车设计》第5版第9章，印刷第304–306页，式（9-9）至（9-12）。</footer>
   </main>
   <script>
 'use strict';
@@ -591,242 +618,270 @@ function plot(ctx, w, h, options) {
   }
 }
 
-const G = 9.8;
-const BOOK = {slope:20, mass:8000, wheelbase:4, rearShare:71.6, height:1.28,
-  adhesion:.7, radius:.325, torque:2600};
-const TRUCK = {...BOOK, mass:3500, wheelbase:2.8, rearShare:66, height:.75, torque:1800};
-const input = bindControls(BOOK, update);
-const bookNote = '初值按图9-9比例设置。质量和轮胎半径用于把无量纲曲线换算为牛顿与力矩。';
-let presetNote = bookNote;
-let baseline = null;
-
-function axleForces(alpha, lambda, hOverL, uphill, weight) {
-  const rear = weight*(lambda*Math.cos(alpha)+(uphill?1:-1)*hOverL*Math.sin(alpha));
-  return {rear, front:weight*Math.cos(alpha)-rear};
-}
-
-function limitFor(config, uphill, torqueForce) {
-  const lambda = config.rearShare/100;
-  const hOverL = config.height/config.wheelbase;
-  const sign = uphill ? 1 : -1;
-  const denominator = 1-sign*config.adhesion*hOverL;
-  const gripAngle = denominator > 0 ? Math.atan(config.adhesion*lambda/denominator) : Infinity;
-  const contactAngle = hOverL > 0 ? Math.atan((uphill ? 1-lambda : lambda)/hOverL) : Math.PI/2;
-  const torqueAngle = Math.asin(clamp(torqueForce/(config.mass*G),0,1));
-  const effective = Math.min(gripAngle,contactAngle,torqueAngle);
-  const factor = effective === gripAngle ? '路面附着' :
-    effective === torqueAngle && torqueAngle < Math.PI/2 ? '制动器力矩' : '车轮接地';
-  return {gripAngle, contactAngle, torqueAngle, effective, factor};
-}
-
-function analyze(config, uphill, limited) {
-  const weight = config.mass*G;
-  const lambda = config.rearShare/100;
-  const hOverL = config.height/config.wheelbase;
-  const alpha = Math.atan(config.slope/100);
-  const {front,rear} = axleForces(alpha,lambda,hOverL,uphill,weight);
-  const contact = Math.min(front,rear) > 0;
-  const demanded = weight*Math.sin(alpha);
-  const grip = config.adhesion*Math.max(0,rear);
-  const torqueForce = limited ? config.torque/config.radius : Infinity;
-  const capacity = Math.min(grip,torqueForce);
-  return {
-    config:{...config}, alpha, weight, uphill, limited, lambda,hOverL,front,rear,contact,
-    demanded,grip,torqueForce,capacity, requestedTorque:demanded*config.radius,
-    up:limitFor(config,true,torqueForce), down:limitFor(config,false,torqueForce)
-  };
-}
-
-function angleText(alpha) {
-  return Number.isFinite(alpha) && alpha < Math.PI/2
-    ? fmt(alpha/RAD,2)+'° · '+fmt(100*Math.tan(alpha),1)+'%'
-    : '未先达到上限';
-}
-
-function presentLimits(r) {
-  for (const direction of ['up','down']) {
-    const limit = r[direction];
-    put(direction+'-grip',angleText(limit.gripAngle));
-    put(direction+'-limit',angleText(limit.effective));
-    put(direction+'-factor',limit.factor);
-  }
-}
-
-function presentParking(r) {
-  metric('needed',r.demanded);
-  metric('grip',r.contact?r.grip:NaN);
-  metric('capacity',r.contact?r.capacity:NaN);
-  metric('required-torque',r.requestedTorque);
-  metric('slope-angle',r.alpha/RAD,2);
-  metric('front-load',r.contact?r.front:NaN);
-  metric('rear-load',r.contact?r.rear:NaN);
-  const msg = $('parking-status');
-  if (!r.contact) {
-    msg.className = 'message bad';
-    msg.textContent = (r.front <= 0 ? '前轴' : '后轴')+'法向载荷降到零。当前坡度超出两轴接地模型范围。';
-  } else if (r.capacity+1e-7 < r.demanded) {
-    msg.className = 'message bad';
-    msg.textContent = (r.grip <= r.torqueForce ? '后轮附着不足' : '后轴制动器力矩不足')+
-      '。可提供的驻车力比需求少 '+fmt(r.demanded-r.capacity)+' N。';
-  } else {
-    msg.className = 'message';
-    msg.textContent = (r.uphill ? '车头朝上坡' : '车头朝下坡')+'，模型中可保持静止。当前驻车力余量 '+fmt(r.capacity-r.demanded)+' N。';
-  }
-  put('inputs-note',presetNote);
-  put('ratio-explain','L₁＝'+fmt(r.lambda*r.config.wheelbase,3)+' m，h_g/L＝'+fmt(r.hOverL,3));
-  const alpha = fmt(r.alpha/RAD,2)+'°';
-  put('calc-gravity','F_B2 ＝ '+fmt(r.weight)+' × sin '+alpha+' ＝ '+fmt(r.demanded)+' N');
-  put('calc-rear',r.contact ?
-    'Z₂ ＝ '+fmt(r.weight)+' × ('+fmt(r.lambda,3)+' × cos '+alpha+' '+(r.uphill?'+':'−')+
-    ' '+fmt(r.hOverL,3)+' × sin '+alpha+') ＝ '+fmt(r.rear)+' N' :
-    'Z₂、Z₁的计算结果表明当前状态不满足两轴接地。');
-  put('calc-grip',r.contact?'F₂φ ＝ '+fmt(r.config.adhesion,2)+' × '+fmt(r.rear)+' ＝ '+fmt(r.grip)+' N':'');
-  put('calc-torque',r.limited ?
-    '制动器上限 T₂/rₑ ＝ '+fmt(r.config.torque)+' ÷ '+fmt(r.config.radius,3)+' ＝ '+fmt(r.torqueForce)+' N' :
-    '后轴制动器力矩按充足处理，驻车力上限取后轴附着力。');
-  $('park-force').setAttribute('aria-label','车头朝'+(r.uphill?'上坡':'下坡')+'时的静力示意，当前坡角'+alpha);
-  $('park-chart').setAttribute('aria-label','驻车力需求与上下坡后轴附着上限。上坡附着极限'+
-    angleText(r.up.gripAngle)+'，下坡附着极限'+angleText(r.down.gripAngle));
-  presentLimits(r);
-}
-
-function presentBaseline(r) {
-  $('baseline-box').hidden = !baseline;
-  $('baseline-clear').hidden = !baseline;
-  if (!baseline) return;
-  const mode = b => b.limited ? '计入力矩上限' : '仅比较附着';
-  const config = b => 'φ '+fmt(b.config.adhesion,2)+' · L₁/L '+fmt(b.config.rearShare,1)+
-    '% · h_g '+fmt(b.config.height,2)+' m · L '+fmt(b.config.wheelbase,2)+
-    ' m · '+fmt(b.config.mass)+' kg'+(b.limited?' · '+fmt(b.config.torque)+' N·m / '+fmt(b.config.radius,3)+' m':'');
-  put('base-inputs',config(baseline));
-  put('current-inputs',config(r));
-  put('base-mode',mode(baseline));
-  put('current-mode',mode(r));
-  put('base-up',angleText(baseline.up.effective));
-  put('base-down',angleText(baseline.down.effective));
-  put('current-up',angleText(r.up.effective));
-  put('current-down',angleText(r.down.effective));
-}
-
+const INITIAL = {friction:.30,support:110,radius:195,angle:12,lever:210,opening:450};
+const EXAMPLE = {friction:.30,support:100,radius:200,angle:0,lever:180,opening:500};
+const controls = bindControls(INITIAL,update);
+const alpha = 18*RAD;
 let result;
-function update() {
-  const limited = $('limit-torque').checked;
-  $('torque-input').hidden = !limited;
-  result = analyze(input.state,$('face-up').checked,limited);
-  presentParking(result);
-  presentBaseline(result);
-  drawPlot();
-  drawVehicle();
+let step = 0;
+
+function solve(config) {
+  const {friction,support,radius,angle,lever,opening} = config;
+  const delta = angle*RAD;
+  const normalArm = support*Math.cos(delta);
+  const frictionArm = radius-support*Math.sin(delta);
+  const critical = normalArm/frictionArm;
+  const frictionMomentPerN = friction*frictionArm;
+  const rawDenominator = normalArm-frictionMomentPerN;
+  const denominator = Math.abs(rawDenominator)<1e-8 ? 0 : rawDenominator;
+  const normal = denominator>0 ? lever*opening/denominator : NaN;
+  const moment = friction*normal*radius/1000;
+  return {config:{...config},delta,normalArm,frictionArm,critical,frictionMomentPerN,denominator,normal,moment};
 }
 
-const drawPlot = canvasRenderer('park-chart',(ctx,w,h) => {
+function margin(value) {
+  if (value !== 0 && Math.abs(value)<.005) return value.toExponential(2);
+  return fmt(value,2);
+}
+
+function magnitude(value, digits) {
+  return Number.isFinite(value) && value >= 1e6 ? value.toExponential(3) : fmt(value,digits);
+}
+
+function showNumbers(r) {
+  const f = r.config.friction;
+  const opened = r.config.opening>0;
+  metric('critical-f',r.critical,4);
+  put('denominator',margin(r.denominator));
+  put('normal-force',magnitude(r.normal,1));
+  put('brake-moment',magnitude(r.moment,2));
+  const status = $('lock-status');
+  let message;
+  if (r.denominator > 0) {
+    const close = r.denominator/r.normalArm < .06;
+    status.className = close ? 'message warn' : 'message';
+    message = '分母为正，当前 f 低于临界值，未达到自锁条件。';
+    if (close && opened) message += '已接近临界，模型中的法向合力对 f 很敏感。';
+    if (!opened) message += '撤去张开力后，平衡给出 F₁＝0。';
+  } else if (r.denominator === 0) {
+    status.className = 'message warn';
+    message = opened ? '达到自锁临界。分母为零，正张开力下没有有限的静力解。' :
+      '达到自锁临界。F₀₁＝0 时，摩擦助张开力矩可抵消法向力闭合力矩，方程仍允许已有压紧力。';
+  } else {
+    status.className = 'message bad';
+    message = '超过自锁临界。摩擦助张开项超过法向闭合项，式（9-12）失去可用的压紧解。';
+  }
+  status.textContent = message;
+  const barMax = Math.max(r.normalArm,r.frictionMomentPerN);
+  $('normal-bar').style.width = 100*r.normalArm/barMax+'%';
+  $('friction-bar').style.width = 100*r.frictionMomentPerN/barMax+'%';
+  put('normal-arm',fmt(r.normalArm,2)+' N·mm');
+  put('friction-arm',fmt(r.frictionMomentPerN,2)+' N·mm');
+  put('calc-critical','临界 f_cr ＝ '+fmt(r.normalArm,3)+' ÷ '+fmt(r.frictionArm,3)+' ≈ '+fmt(r.critical,4)+'。');
+  put('calc-denominator','式（9-12）分母＝'+fmt(r.normalArm,3)+' − '+fmt(f,4)+' × '+
+    fmt(r.frictionArm,3)+'＝'+margin(r.denominator)+' mm。');
+  put('calc-result', r.denominator>0
+    ? 'F₁＝'+fmt(r.config.opening)+' × '+fmt(r.config.lever)+' ÷ '+margin(r.denominator)+' ≈ '+magnitude(r.normal,1)+
+      ' N。Mμt1＝fF₁R₁ ÷ 1000 ≈ '+magnitude(r.moment,2)+' N·m。'
+    : '分母非正时停止显示由式（9-12）外推的制动力矩。');
+  $('denom-plot').setAttribute('aria-label','分母随摩擦因数线性下降。临界摩擦因数'+
+    fmt(r.critical,4)+'，当前摩擦因数'+fmt(f,4)+'，分母'+margin(r.denominator)+'毫米。');
+  put('boundary-note','调 f 会沿同一条直线移动。改变几何会改变直线与零线的交点。当前 f＝'+fmt(f,4)+
+    '，分母为 '+margin(r.denominator)+' mm。');
+}
+
+function update() {
+  result = solve(controls.state);
+  showNumbers(result);
+  drawForce();
+  drawDenominator();
+}
+
+const supportColor = '#687983';
+const figureNotes = [
+  '沿 x₁ 投影时用到 F₁ cos δ₁ 和 fF₁ sin δ₁。力箭头示方向，长度为示意。',
+  '两条虚线分别给出法向力和摩擦力关于支点 A₁ 的垂距。',
+  'R₁ 从鼓中心 O 量到摩擦合力作用线，与法向合力到支点的力臂不同。',
+  '比较支点 A₁ 两侧力矩。摩擦产生张开作用，法向合力产生闭合作用。'
+];
+
+function selectStep(index) {
+  step = clamp(index,0,3);
+  for (const button of document.querySelectorAll('[data-step]')) {
+    button.setAttribute('aria-pressed', Number(button.dataset.step)===step?'true':'false');
+  }
+  for (const article of document.querySelectorAll('[data-proof]')) article.hidden=Number(article.dataset.proof)!==step;
+  $('step-back').disabled=step===0;
+  $('step-next').disabled=step===3;
+  put('figure-note',figureNotes[step]);
+  drawForce();
+}
+
+const drawDenominator = canvasRenderer('denom-plot',(ctx,w,h) => {
   if (!result) return;
   const r = result;
-  const adhesion = (angle,up) => {
-    const f = axleForces(angle*RAD,r.lambda,r.hOverL,up,1);
-    return Math.min(f.front,f.rear) <= 0 ? null : r.config.adhesion*f.rear;
-  };
-  const xTicks=[0,5,10,15,20,25,30,35,40,45];
-  const curves = [
-    {fn:x=>Math.sin(x*RAD),color:colors.rust},
-    {fn:x=>adhesion(x,true),color:colors.teal,width:r.uphill?3.2:2},
-    {fn:x=>adhesion(x,false),color:colors.purple,width:r.uphill?2:3.2,dash:[7,4]}
-  ];
-  const torqueNormalized = r.torqueForce/r.weight;
-  if (r.limited && torqueNormalized <= 1) curves.push({fn:()=>torqueNormalized,color:colors.slate,dash:[3,5]});
-  $('torque-legend').hidden = !r.limited || torqueNormalized > 1;
-  const points = [
-    {x:r.alpha/RAD,y:r.demanded/r.weight,color:colors.rust,r:5.5},
-    {x:r.alpha/RAD,y:r.grip/r.weight,color:r.uphill?colors.teal:colors.purple,r:5.5},
-  ];
-  if (!r.contact) points.pop();
-  for (const [name,limit,color] of [['上',r.up,colors.teal],['下',r.down,colors.purple]]) {
-    if (limit.gripAngle > 0 && limit.gripAngle <= limit.contactAngle && limit.gripAngle <= 45*RAD) {
-      points.push({x:limit.gripAngle/RAD,y:Math.sin(limit.gripAngle),color,
-        label:name+' '+fmt(limit.gripAngle/RAD,1)+'°',offset:name==='上'?-13:15});
-    }
-  }
-  plot(ctx,w,h,{xTicks:w<500?xTicks.filter((_,i)=>i%2===0 || i===9):xTicks,
-    yTicks:[0,.2,.4,.6,.8,1],yText:n=>fmt(n,1),xLabel:'坡道倾角 α (°)',yLabel:'力 / 整车重力',
-    curves,cursor:r.alpha/RAD,points});
-});
-
-const drawVehicle = canvasRenderer('park-force',(ctx,w,h) => {
-  if (!result) return;
-  scaled(ctx,w,h,650,222,ctx => {
-    const r=result;
-    const theta = Math.min(r.alpha,20*RAD)*(r.uphill?-1:1);
-    const xcg = 155-r.lambda*310;
-    const ycg = -clamp(43+r.hOverL*50,43,72);
-    ctx.save();
-    ctx.translate(315,145);
-    ctx.rotate(theta);
-    line(ctx,-245,0,245,0,'#72909b',2.8);
-    for (let x=-236;x<246;x+=22) line(ctx,x,2,x-8,11,'#bacdd3');
-    box(ctx,-193,-70,232,47,5,'#d5e8eb','#674f55',1.6);
-    ctx.beginPath();
-    ctx.moveTo(40,-72);
-    ctx.lineTo(125,-72);
-    ctx.lineTo(171,-55);
-    ctx.lineTo(187,-23);
-    ctx.lineTo(39,-23);
-    ctx.closePath();
-    ctx.fillStyle = '#b4d6db';
-    ctx.fill();
-    ctx.lineWidth = 1.6;
-    ctx.strokeStyle = '#385964';
-    ctx.stroke();
-    box(ctx,96,-65,43,19,3,'#e5f4f5','#63828e');
-    line(ctx,70,-67,70,-24,'#557784',1);
-    for (const x of [-155,155]) {
-      circle(ctx,x,-15,15,'#233743');
-      circle(ctx,x,-15,6,'#aabfc5');
-    }
-    const narrow = r.weight > 0 ? 44/r.weight : 0;
-    for (const [bound,x,text] of [[r.rear,-155,'Z₂'],[r.front,155,'Z₁']]) {
-      const length = clamp(bound*narrow,0,62);
-      if (length > 1) {
-        arrow(ctx,x,1,x,-21-length,colors.blue,2,7);
-        label(ctx,text,x+(x<0?-9:9),-22-length,colors.blue,14,x<0?'right':'left',730);
-      }
-    }
-    label(ctx,'后轴',-155,20,colors.muted,12,'center');
-    label(ctx,'前轴／车头',155,20,colors.muted,12,'center');
-    if (r.demanded > 0.001) {
-      const slopeDirection=r.uphill?1:-1;
-      const length = clamp(31+r.demanded/r.weight*62,32,72);
-      arrow(ctx,-155,0,-155+slopeDirection*length,0,colors.teal,3.5,9);
-      label(ctx,'所需驻车力',-155+slopeDirection*(length+10),-7,colors.teal,13,
-        r.uphill?'left':'right',730);
-      arrow(ctx,xcg,ycg,xcg-slopeDirection*length,ycg,colors.rust,2.5,8);
-      label(ctx,'mg sin α',xcg-slopeDirection*length/2,ycg-14,colors.rust,13,'center',690);
-    }
-    circle(ctx,xcg,ycg,5,'#fbf7e9','#694721',1.6);
-    ctx.restore();
-    const absoluteX=315+xcg*Math.cos(theta)-ycg*Math.sin(theta);
-    const absoluteY=145+xcg*Math.sin(theta)+ycg*Math.cos(theta);
-    arrow(ctx,absoluteX,absoluteY+4,absoluteX,absoluteY+46,'#754b29',2,7);
-    label(ctx,'mg',absoluteX+8,absoluteY+25,'#754b29',13);
-    label(ctx,'质心',absoluteX+8,absoluteY-11,colors.ink,13);
+  const xTicks = axis(Math.max(.75,r.critical*1.16,r.config.friction*1.08),5);
+  const maxF = xTicks.at(-1);
+  const minimum = r.normalArm - r.frictionArm*maxF;
+  const tick = axis(r.normalArm-minimum,5)[1];
+  const yOffset = Math.ceil(-minimum/tick)*tick;
+  const intervals = Math.ceil((r.normalArm+yOffset)/tick);
+  const yTicks = Array.from({length:intervals+1},(_,i)=>i*tick);
+  plot(ctx,w,h,{
+    xTicks,yTicks,
+    xText:n=>fmt(n,Number.isInteger(n)?0:2),
+    yText:n=>fmt(n-yOffset),
+    xLabel:'衬片–鼓摩擦因数 f',
+    yLabel:'式（9-12）分母 (mm)',
+    curves:[
+      {fn:()=>yOffset,color:supportColor,width:1.5,dash:[5,4]},
+      {fn:f=>r.normalArm-r.frictionArm*f+yOffset,color:colors.teal,width:2.8}
+    ],
+    cursor:r.config.friction,
+    points:[
+      {x:r.critical,y:yOffset,color:colors.rust,r:5.5,label:'f_cr '+fmt(r.critical,3),offset:-14},
+      {x:r.config.friction,y:r.denominator+yOffset,color:r.denominator>0?colors.teal:colors.rust,r:4.6}
+    ],
   });
 });
 
-for (const id of ['face-up','face-down','limit-torque']) $(id).addEventListener('change',update);
-$('park-book').addEventListener('click',() => {
-  $('face-up').checked=true;
-  $('limit-torque').checked=false;
-  presetNote = bookNote;
-  input.reset();
+function edgePoint(from, axis, length) {
+  return {x:from.x+axis.x*length,y:from.y+axis.y*length};
+}
+
+function sketchArc(ctx,center,r,from,to,color,width,backwards=false) {
+  ctx.beginPath();
+  ctx.strokeStyle=color;
+  ctx.lineWidth=width;
+  ctx.arc(center.x,center.y,r,from,to,backwards);
+  ctx.stroke();
+}
+
+function vecLine(ctx,a,b,color,width,dash) {
+  line(ctx,a.x,a.y,b.x,b.y,color,width,dash);
+}
+
+function vecArrow(ctx,a,b,color,width,head) {
+  arrow(ctx,a.x,a.y,b.x,b.y,color,width,head);
+}
+
+function extendAndMark(ctx,pivot,origin,dir,length,caption,color,offset) {
+  const projection=(pivot.x-origin.x)*dir.x+(pivot.y-origin.y)*dir.y;
+  const foot=edgePoint(origin,dir,projection);
+  const extended=edgePoint(origin,dir,length);
+  vecLine(ctx,origin,extended,color,1.2,[4,4]);
+  vecLine(ctx,pivot,foot,color,2,[5,3]);
+  circle(ctx,foot.x,foot.y,3,'white',color,1.4);
+  label(ctx,caption,(pivot.x+foot.x)/2+offset.x,clamp((pivot.y+foot.y)/2+offset.y,20,387),
+    color,15,offset.align,720);
+}
+
+const drawForce = canvasRenderer('force-view',(ctx,w,h) => {
+  if (!result) return;
+  scaled(ctx,w,h,626,405,ctx => {
+    const r = result, c = r.config;
+    const o = {x:370,y:215};
+    const x1 = {x:-Math.cos(alpha),y:-Math.sin(alpha)};
+    const y1 = {x:Math.sin(alpha),y:-Math.cos(alpha)};
+    const n = {
+      x:Math.cos(r.delta)*x1.x-Math.sin(r.delta)*y1.x,
+      y:Math.cos(r.delta)*x1.y-Math.sin(r.delta)*y1.y
+    };
+    const t = {x:n.y, y:-n.x};
+    const scale = Math.min(161/c.radius,198/c.lever);
+    const pivot = edgePoint(o,y1,-c.support*scale);
+    const contact = edgePoint(o,n,c.radius*scale);
+    const shoeRadius = (c.radius+c.support)*scale/2;
+    const leverY = pivot.y-c.lever*scale;
+    const opening = {x:o.x-39,y:leverY};
+    const edge = end => ({x:o.x+shoeRadius*Math.cos(end),y:o.y+shoeRadius*Math.sin(end)});
+
+    sketchArc(ctx,o,shoeRadius+14,100*RAD,266*RAD,'#d6e6eb',12);
+    sketchArc(ctx,o,shoeRadius+9,106*RAD,253*RAD,'#577682',1.8);
+    sketchArc(ctx,o,shoeRadius-1,111*RAD,245*RAD,'#7899a6',10);
+    vecLine(ctx,edge(112*RAD),pivot,'#7899a6',7);
+    vecLine(ctx,edge(244*RAD),opening,'#7899a6',7);
+    label(ctx,'衬片',o.x-shoeRadius-29,o.y-shoeRadius*.77,colors.muted,15,'right',640);
+
+    const rotationStart=-63*RAD;
+    const rotationEnd=-120*RAD;
+    const rotationRadius=shoeRadius+29;
+    sketchArc(ctx,o,rotationRadius,rotationStart,rotationEnd,colors.ink,2.4,true);
+    const ex=o.x+rotationRadius*Math.cos(rotationEnd), ey=o.y+rotationRadius*Math.sin(rotationEnd);
+    arrow(ctx,ex+13*Math.cos(rotationEnd+Math.PI/2),ey+13*Math.sin(rotationEnd+Math.PI/2),ex,ey,colors.ink,2.3,8);
+    label(ctx,'鼓旋向',o.x+rotationRadius*.51,o.y-rotationRadius*.88,colors.ink,15,'left',680);
+
+    line(ctx,o.x-196,o.y,545,o.y,'#cfdee2',1,[4,4]);
+    const xAxis=edgePoint(o,x1,207), yAxis=edgePoint(o,y1,132);
+    vecArrow(ctx,edgePoint(o,x1,-78),xAxis,'#91aab1',1.2,6);
+    vecArrow(ctx,edgePoint(pivot,y1,-23),yAxis,'#91aab1',1.2,6);
+    label(ctx,'x₁',xAxis.x-7,xAxis.y-10,colors.muted,15,'right');
+    label(ctx,'y₁',yAxis.x+8,yAxis.y,colors.muted,15);
+
+    vecLine(ctx,o,contact,step===2?colors.teal:'#758e98',step===2?2.4:1.2,[4,4]);
+    const theta=Math.atan2(x1.y,x1.x);
+    if (Math.abs(r.delta)>1*RAD) {
+      sketchArc(ctx,o,64,theta,theta-r.delta,'#465f68',1.4,r.delta>0);
+      const mid=theta-r.delta/2;
+      label(ctx,'δ₁',o.x+81*Math.cos(mid),o.y+81*Math.sin(mid)-10,colors.muted,15,'center',770);
+    }
+
+    // The two equivalent resultants have the textbook's lines of action.
+    const inputEnd={x:opening.x-81,y:opening.y};
+    if (c.opening>0) vecArrow(ctx,opening,inputEnd,colors.blue,3.1,9);
+    else vecLine(ctx,opening,inputEnd,colors.blue,1.3,[4,4]);
+    label(ctx,c.opening>0?'F₀₁':'F₀₁＝0',opening.x-87,opening.y-13,colors.blue,16,'left',780);
+    if (step===0) {
+      const reaction = edgePoint(pivot,x1,55);
+      vecArrow(ctx,pivot,reaction,supportColor,2.3,7);
+      label(ctx,'F′ₓ',reaction.x-4,reaction.y+12,supportColor,15,'right',650);
+    }
+    const normalEnd=edgePoint(contact,n,-Math.min(70,c.radius*scale*.42));
+    vecArrow(ctx,contact,normalEnd,colors.teal,3,9);
+    label(ctx,'F₁',normalEnd.x+3,normalEnd.y+17,colors.teal,16,'center',770);
+    const frictionEnd=edgePoint(contact,t,61);
+    if (c.friction>0) vecArrow(ctx,contact,frictionEnd,colors.rust,3,9);
+    else vecLine(ctx,contact,frictionEnd,colors.rust,1.3,[4,4]);
+    label(ctx,c.friction>0?'fF₁':'fF₁＝0',frictionEnd.x-7,frictionEnd.y+12,colors.rust,16,'right',770);
+
+    if (step===1 || step===3) {
+      extendAndMark(ctx,pivot,o,n,202,'c′ cos δ₁',colors.teal,{x:13,y:3,align:'left'});
+      extendAndMark(ctx,pivot,contact,t,122,'R₁ − c′ sin δ₁',colors.rust,{x:-16,y:26,align:'center'});
+    }
+    if (step===2) {
+      label(ctx,'R₁',(o.x+contact.x)/2+4,(o.y+contact.y)/2-16,colors.teal,17,'center',780);
+      circle(ctx,contact.x,contact.y,4,'white',colors.teal,1.5);
+    }
+
+    const dimensionX=560;
+    line(ctx,opening.x+8,leverY,dimensionX+5,leverY,'#afc3c9',1,[3,4]);
+    line(ctx,pivot.x+7,pivot.y,dimensionX+5,pivot.y,'#afc3c9',1,[3,4]);
+    arrow(ctx,dimensionX,pivot.y-2,dimensionX,leverY+2,supportColor,1.3,6);
+    arrow(ctx,dimensionX,leverY+2,dimensionX,pivot.y-2,supportColor,1.3,6);
+    label(ctx,'h',dimensionX+10,(leverY+pivot.y)/2,supportColor,17,'left',700);
+    if (step===0) label(ctx,'c′',(o.x+pivot.x)/2+10,(o.y+pivot.y)/2-4,colors.muted,15,'left');
+    circle(ctx,o.x,o.y,4.3,'#fff','#607b87',1.8);
+    label(ctx,'O',o.x+8,o.y-11,colors.ink,15,'left',770);
+    circle(ctx,pivot.x,pivot.y,7,'#e7b851','#74521c',1.8);
+    line(ctx,pivot.x-13,pivot.y+10,pivot.x+13,pivot.y+10,'#96773d',1.3);
+    label(ctx,'A₁',pivot.x+11,pivot.y-5,colors.ink,16,'left',770);
+  });
 });
-$('park-truck').addEventListener('click',() => {
-  $('face-up').checked=true;
-  $('limit-torque').checked=false;
-  presetNote='第1章满载轻型货车。启用力矩上限时，1,800 N·m为教学假设。';
-  input.set(TRUCK);
+
+for (const button of document.querySelectorAll('[data-step]')) button.addEventListener('click',()=>{
+  selectStep(Number(button.dataset.step));
 });
-$('baseline-save').addEventListener('click',() => { baseline = result; presentBaseline(result); });
-$('baseline-clear').addEventListener('click',() => { baseline = null; presentBaseline(result); });
+for (const button of document.querySelectorAll('[data-boundary]')) button.addEventListener('click',()=>{
+  controls.set({friction:result.critical*Number(button.dataset.boundary)});
+  selectStep(3);
+});
+$('step-back').addEventListener('click',()=>selectStep(step-1));
+$('step-next').addEventListener('click',()=>selectStep(step+1));
+$('load-example').addEventListener('click',()=>controls.set(EXAMPLE));
+$('release-shoe').addEventListener('click',()=>controls.set({opening:0}));
+$('reset-input').addEventListener('click',()=>{controls.reset();selectStep(0);});
 update();
+selectStep(0);
 
   </script>
 </body>
